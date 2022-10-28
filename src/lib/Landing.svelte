@@ -1,16 +1,16 @@
 <script>
   import { onMount } from "svelte";
   import { fade } from "svelte/transition";
-  import { AccountCtrl, ClientCtrl, ConfigCtrl, ModalCtrl } from "@web3modal/core";
+  import {
+    AccountCtrl,
+    ClientCtrl,
+    ConfigCtrl,
+    ModalCtrl,
+  } from "@web3modal/core";
   import { chains, providers } from "@web3modal/ethereum";
   import "@web3modal/ui";
 
-  import {
-    connected,
-    signerAddress,
-    defaultEvmStores,
-    provider
-  } from "svelte-ethers-store";
+  let connected, address;
 
   // Define constants
   const PROJECT_ID = "e8c3f6360905ea7d27c22698599cf084";
@@ -36,9 +36,13 @@
   ClientCtrl.subscribe(({ initialized }) => {
     if (initialized) {
       AccountCtrl.watch((account) => {
-        console.log(account)
+        console.log("Account detected: ", account);
         if (account) {
-          console.log(account.address);
+          connected = account.isConnected;
+          address = account.address;
+          console.log("Logging status of detected account");
+          console.log("Address: ", account.address);
+          console.log("isConnected: ", account.isConnected);
         } else {
           console.log(account);
         }
@@ -54,10 +58,11 @@
 
   const handleConnectWallet = async () => {
     const account = AccountCtrl.get();
-    console.log("Address: ", account.address)
+    console.log("Logging status of account on button click");
+    console.log("Address: ", account.address);
     console.log("isConnected: ", account.isConnected);
 
-    ModalCtrl.open()
+    ModalCtrl.open();
   };
 </script>
 
@@ -67,23 +72,20 @@
 >
   <img class="2-1/2" src="logo.png" alt="Logo" />
   <div class="flex justify-center">
-    <button
-      on:click={handleConnectWallet}
-      class="text-white border-2 border-primary bg-primary py-1 px-2 rounded-lg font-bold"
-    >
-      {#if $connected}
-          Enter PFP Creator
-        {:else}
-          Connect Wallet
-      {/if}
-    </button>
-    <w3m-modal />
+    {#if connected}
+      <button class="text-white border-2 border-primary bg-primary py-1 px-2 rounded-lg font-bold" >
+        {address.substr(0, 9) + "..."}
+      </button>
+    {:else}
+      <button
+        on:click={handleConnectWallet}
+        class="text-white border-2 border-primary bg-primary py-1 px-2 rounded-lg font-bold"
+      >
+        Connect Wallet
+      </button>
+    {/if}
 
-    <!-- <div id="app">
-      <div id="disconnected">
-        <w3m-connect-button />
-      </div>
-    </div> -->
+    <w3m-modal />
   </div>
 </div>
 
